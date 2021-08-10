@@ -3,14 +3,10 @@ import { GameContext } from "./GameProvider.js"
 import { useHistory } from 'react-router-dom'
 
 
-export const GameForm = () => {
+export const GameForm = (props) => {
     const history = useHistory()
-    const { createGame, getGameTypes, gameTypes } = useContext(GameContext)
-    /*
-        Since the input fields are bound to the values of
-        the properties of this state variable, you need to
-        provide some default values.
-    */
+    const { createGame, getGameTypes, gameTypes, getGame, editGame } = useContext(GameContext)
+
     const [currentGame, setCurrentGame] = useState({
         skillLevel: 1,
         numberOfPlayers: 0,
@@ -19,24 +15,24 @@ export const GameForm = () => {
         gameTypeId: 1
     })
 
-    /*
-        Get game types on initialization so that the <select>
-        element presents game type choices to the user.
-    */
     useEffect(() => {
         getGameTypes()
     }, [])
 
-    /*
-        REFACTOR CHALLENGE START
+    useEffect(()=>{
+        if ("gameId" in props.match.params) {
+            getGame(props.match.params.gameId).then(game=> {
+                setCurrentGame({
+                    skillLevel: game.skill_level,
+                    numberOfPlayers: game.number_of_players,
+                    title: game.title,
+                    gameTypeId: game.game_type.id,
+                    maker: game.maker
+                })
+            })
+        }
+    },[props.match.params.gameId])
 
-        Can you refactor this code so that all property
-        state changes can be handled with a single function
-        instead of five functions that all, largely, do
-        the same thing?
-
-        One hint: [event.target.name]
-    */
     const changeGameState = (event) => {
         const newGameState = { ...currentGame }
         if (event.target.name === "title") {
@@ -56,7 +52,6 @@ export const GameForm = () => {
         }
         setCurrentGame(newGameState)
     }
-    /* REFACTOR CHALLENGE END */
 
     return (
         <form className="gameForm">
@@ -81,14 +76,14 @@ export const GameForm = () => {
             </fieldset>
             <fieldset>
                 <div className="form-group">
-                    <label htmlFor="maker">Game Type: </label>
+                    <label htmlFor="game_type">Game Type: </label>
                     <select type="text" name="game_type" required autoFocus className="form-control"
                         value={currentGame.gameTypeId}
                         onChange={changeGameState}
                     >
                         {
                             gameTypes.map(
-                                type => <option value={type.id}>{type.label}</option>
+                                type => <option key={type.id} value={type.id}>{type.label}</option>
                             )
                         }
                     </select>
@@ -112,28 +107,39 @@ export const GameForm = () => {
                     />
                 </div>
             </fieldset>
-        
-
-            {/* You create the rest of the input fields for each game property */}
-
-            <button type="submit"
-                onClick={evt => {
-                    // Prevent form from being submitted
-                    evt.preventDefault()
-
-                    const game = {
-                        maker: currentGame.maker,
-                        title: currentGame.title,
-                        numberOfPlayers: parseInt(currentGame.numberOfPlayers),
-                        skillLevel: parseInt(currentGame.skillLevel),
-                        gameTypeId: parseInt(currentGame.gameTypeId)
-                    }
-
-                    // Send POST request to your API
-                    createGame(game)
-                        .then(() => history.push("/games"))
-                }}
-                className="btn btn-primary">Create</button>
+        {
+            ("gameId" in props.match.params)
+            ?  <button 
+            onClick={evt => {
+                // Prevent form from being submitted
+                evt.preventDefault()
+                console.log(currentGame)
+                editGame({
+                    id: props.match.params.gameId,
+                    maker: currentGame.maker,
+                    title: currentGame.title,
+                    numberOfPlayers: parseInt(currentGame.numberOfPlayers),
+                    skillLevel: parseInt(currentGame.skillLevel),
+                    gameTypeId: parseInt(currentGame.gameTypeId)
+                }).then(()=>props.history.push("/games"))
+            }}
+            className="btn btn-primary">Edit</button>
+            : <button type="submit"
+            onClick={evt => {
+                // Prevent form from being submitted
+                evt.preventDefault()
+                const game = {
+                    maker: currentGame.maker,
+                    title: currentGame.title,
+                    numberOfPlayers: parseInt(currentGame.numberOfPlayers),
+                    skillLevel: parseInt(currentGame.skillLevel),
+                    gameTypeId: parseInt(currentGame.gameTypeId)
+                }
+                createGame(game)
+                    .then(() => history.push("/games"))
+            }}
+            className="btn btn-primary">Create</button>
+        }         
         </form>
     )
 }
