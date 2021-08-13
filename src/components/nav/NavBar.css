@@ -1,10 +1,21 @@
 .navbar {
     display: flex;
     flex-wrap: nowrap;
-    justify-content: left;
+    justify-content: center;
+    font-family: 'Press Start 2P', cursive;
 }
 
 .navbar__item {
     flex-basis: 20%;
+    list-style-type: none;
+    text-decoration: none;
+}
+
+.nav-link {
+    color: #069feb;
+    text-decoration: none;
+}
+
+.nav-item {
     list-style-type: none;
 }

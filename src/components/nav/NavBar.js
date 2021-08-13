@@ -6,23 +6,23 @@ export const NavBar = (props) => {
     return (
         <ul className="navbar">
             <li className="navbar__item">
-                <Link className="nav-link" to="/games">Games</Link>
+                <Link className="nav-link" to="/games">GAMES</Link>
             </li>
             <li className="navbar__item">
-                <Link className="nav-link" to="/events">Events</Link>
+                <Link className="nav-link" to="/events">EVENTS</Link>
             </li>
             <li className="navbar__item">
-            <Link className="nav-link" to="/profile">Profile</Link>
+            <Link className="nav-link" to="/profile">PROFILE</Link>
             </li>
             {
                 (localStorage.getItem("lu_token") !== null) ?
                     <li className="nav-item">
-                        <button className="nav-link fakeLink"
+                        <Link className="nav-link"
                             onClick={() => {
                                 localStorage.removeItem("lu_token")
                                 props.history.push({ pathname: "/" })
                             }}
-                        >Logout</button>
+                        >LOGOUT</Link>
                     </li> :
                     <>
                         <li className="nav-item">
